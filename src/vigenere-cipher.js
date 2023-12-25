@@ -1,32 +1,51 @@
 const { NotImplementedError } = require('../extensions/index.js');
 
-/**
- * Implement class VigenereCipheringMachine that allows us to create
- * direct and reverse ciphering machines according to task description
- * 
- * @example
- * 
- * const directMachine = new VigenereCipheringMachine();
- * 
- * const reverseMachine = new VigenereCipheringMachine(false);
- * 
- * directMachine.encrypt('attack at dawn!', 'alphonse') => 'AEIHQX SX DLLU!'
- * 
- * directMachine.decrypt('AEIHQX SX DLLU!', 'alphonse') => 'ATTACK AT DAWN!'
- * 
- * reverseMachine.encrypt('attack at dawn!', 'alphonse') => '!ULLD XS XQHIEA'
- * 
- * reverseMachine.decrypt('AEIHQX SX DLLU!', 'alphonse') => '!NWAD TA KCATTA'
- * 
- */
 class VigenereCipheringMachine {
-  encrypt() {
-    throw new NotImplementedError('Not implemented');
-    // remove line with error and write your code here
+  constructor(direct = true) {
+    this.direct = direct;
+    this.alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   }
-  decrypt() {
-    throw new NotImplementedError('Not implemented');
-    // remove line with error and write your code here
+
+  generateKey(str, key) {
+    key = key.toUpperCase();
+    if (str.length === key.length) return key;
+    let keyIndex = 0;
+    return str.toUpperCase().split('').map((char) => {
+      if (this.alphabet.includes(char)) {
+        return key[keyIndex++ % key.length];
+      }
+      return char;
+    }).join('');
+  }
+
+  encrypt(text, key) {
+    if (!text || !key) throw new Error('Incorrect arguments!');
+    const extendedKey = this.generateKey(text, key);
+    let encryptedText = '';
+    for (let i = 0; i < text.length; i++) {
+      if (this.alphabet.includes(text[i].toUpperCase())) {
+        let charIndex = (this.alphabet.indexOf(text[i].toUpperCase()) + this.alphabet.indexOf(extendedKey[i])) % 26;
+        encryptedText += this.alphabet[charIndex];
+      } else {
+        encryptedText += text[i];
+      }
+    }
+    return this.direct ? encryptedText : encryptedText.split('').reverse().join('');
+  }
+
+  decrypt(text, key) {
+    if (!text || !key) throw new Error('Incorrect arguments!');
+    const extendedKey = this.generateKey(text, key);
+    let decryptedText = '';
+    for (let i = 0; i < text.length; i++) {
+      if (this.alphabet.includes(text[i].toUpperCase())) {
+        let charIndex = (this.alphabet.indexOf(text[i].toUpperCase()) - this.alphabet.indexOf(extendedKey[i]) + 26) % 26;
+        decryptedText += this.alphabet[charIndex];
+      } else {
+        decryptedText += text[i];
+      }
+    }
+    return this.direct ? decryptedText : decryptedText.split('').reverse().join('');
   }
 }
 
